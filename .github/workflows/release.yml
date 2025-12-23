@@ -1,41 +1,74 @@
-name: Release
+name: Release and Publish
 
 on:
   push:
-    branches:
-      - main
-
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   release:
-    name: Release
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
 
-      - name: Setup Node.js
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9.9.0
+          run_install: false
 
-      - name: Install Dependencies
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create Release Pull Request or Publish
-        id: changesets
-        uses: changesets/action@v1
+      - name: Build router package
+        run: pnpm -F @my-uni/router build
+
+      - name: Publish @my-uni/router
+        run: pnpm -F @my-uni/router publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
         with:
-          publish: pnpm release
-          version: pnpm version-packages
-          commit: 'chore: version packages'
-          title: 'chore: version packages'
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+
+      - name: Release summary
+        run: |
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### Version: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "### Published Packages" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ @my-uni/router" >> $GITHUB_STEP_SUMMARY
+          echo "### Build Results" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All packages published successfully" >> $GITHUB_STEP_SUMMARY
