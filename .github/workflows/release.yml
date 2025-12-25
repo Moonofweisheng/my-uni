@@ -59,7 +59,7 @@ jobs:
         run: npm -v
 
       - name: Publish @wot-ui/router
-        run: pnpm -F @wot-ui/router publish --no-git-checks --access public
+        run: pnpm -F @wot-ui/router publish --no-git-checks --provenance --access public
 
       - name: Generate GitHub Changelog
         run: pnpx changelogithub
