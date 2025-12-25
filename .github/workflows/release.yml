@@ -3,19 +3,15 @@ name: Release and Publish
 on:
   push:
     tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      - 'v*'
 
 permissions:
+  id-token: write  # Required for OIDC
   contents: read
-  id-token: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [24]
 
     steps:
       - name: Checkout code
@@ -23,10 +19,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup pnpm
@@ -53,6 +49,9 @@ jobs:
 
       - name: Build router package
         run: pnpm -F @wot-ui/router build
+
+      - name: Check npm version
+        run: npm -v
 
       - name: Publish @wot-ui/router
         run: pnpm -F @wot-ui/router publish --no-git-checks --access public
