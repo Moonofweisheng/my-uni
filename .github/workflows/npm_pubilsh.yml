@@ -25,15 +25,10 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Check OIDC
-        run: echo "OIDC available"
-        env:
-          ACTIONS_ID_TOKEN_REQUEST_URL: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL }}
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.9.0
+          version: 9
           run_install: false
 
       - name: Get pnpm store directory
