@@ -1,12 +1,3 @@
-/*
- * @Author: weisheng
- * @Date: 2023-04-23 13:19:59
- * @LastEditTime: 2023-04-27 12:45:37
- * @LastEditors: weisheng
- * @Description:url工具
- * @FilePath: \uni-mini-router\src\utils\index.ts
- * 记得注释
- */
 /**
  * 获取url中的参数
  * @param path 完整路径

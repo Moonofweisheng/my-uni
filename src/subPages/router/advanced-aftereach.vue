@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePage({
-  name: 'demo-aftereach',
+  name: 'advanced-aftereach',
   style: {
     navigationBarTitleText: 'afterEach 钩子演示',
   },

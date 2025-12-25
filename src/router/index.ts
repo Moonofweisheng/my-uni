@@ -1,7 +1,7 @@
 /*
  * @Author: weisheng
  * @Date: 2025-12-22 14:19:12
- * @LastEditTime: 2025-12-23 11:29:41
+ * @LastEditTime: 2025-12-24 22:16:39
  * @LastEditors: weisheng
  * @Description:
  * @FilePath: /my-uni/src/router/index.ts
@@ -39,7 +39,7 @@ router.beforeEach((to, from, next) => {
   }
 
   // 演示：对受保护页面的简单拦截
-  if (to.name === 'demo-protected') {
+  if (to.name === 'advanced-protected') {
     const { confirm: showConfirm } = useGlobalMessage()
     console.log('🛡️ 检测到访问受保护页面')
 
@@ -81,6 +81,15 @@ router.afterEach((to, from) => {
     console.log('📊 进入 afterEach 演示页面')
     setTimeout(() => {
       showToast('afterEach 钩子已触发！')
+    }, 500)
+  }
+
+  // 演示：针对后置钩子示例页面的特殊处理
+  if (to.name === 'advanced-aftereach') {
+    const { show: showToast } = useGlobalToast()
+    console.log('📊 进入后置钩子示例页面')
+    setTimeout(() => {
+      showToast('全局 afterEach 钩子已触发！')
     }, 500)
   }
 })

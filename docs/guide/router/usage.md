@@ -143,7 +143,7 @@ function back() {
 
 ## 导航守卫
 
-`uni-mini-router`支持`全局前置导航守卫 beforeEach`和`全局后置导航守卫 afterEach`，主要用来通过跳转或取消的方式守卫导航。
+`@wot-ui/router`支持`全局前置导航守卫 beforeEach`和`全局后置导航守卫 afterEach`，主要用来通过跳转或取消的方式守卫导航。
 
 #### 全局前置守卫 beforeEach
 你可以使用 `router.beforeEach` 注册一个全局前置守卫：

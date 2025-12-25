@@ -9,19 +9,21 @@ type _LocationUrl =
   "/subPages/ci/index" |
   "/subPages/create-uni/index" |
   "/subPages/feedback/index" |
-  "/subPages/icon/index" |
-  "/subPages/pinia/index" |
-  "/subPages/request/index" |
-  "/subPages/router/demo-aftereach" |
-  "/subPages/router/demo-guard" |
-  "/subPages/router/demo-object" |
-  "/subPages/router/demo-params" |
-  "/subPages/router/demo-protected" |
-  "/subPages/router/demo-query" |
-  "/subPages/router/demo-string" |
+  "/subPages/router/advanced-aftereach" |
+  "/subPages/router/advanced-beforeeach" |
+  "/subPages/router/advanced-guard-async" |
+  "/subPages/router/advanced-guard-remove" |
+  "/subPages/router/advanced-guard-return" |
+  "/subPages/router/advanced-protected-target" |
+  "/subPages/router/advanced-protected" |
+  "/subPages/router/advanced" |
+  "/subPages/router/api-reference-back" |
+  "/subPages/router/api-reference" |
+  "/subPages/router/essentials-navigation" |
+  "/subPages/router/essentials-params" |
+  "/subPages/router/essentials" |
   "/subPages/router/index" |
-  "/subPages/styles/index" |
-  "/subPages/uni-ku-root/index" |
+  "/subPages/router/router-advanced-protected-target" |
   "/subEcharts/echarts/index" |
   "/subAsyncEcharts/asyncEcharts/index";
 

@@ -1,6 +1,7 @@
 import { shallowRef, unref } from 'vue'
 import type { App } from 'vue'
 import type {
+  LocationQuery,
   NavigationGuard,
   NavigationGuardNext,
   NavigationHookAfter,
@@ -38,18 +39,18 @@ export function createRouter(options: RouterOptions): Router {
     if (to.name) {
       const route = routes.find(r => r.name === to.name)
       if (!route) {
-        console.warn(`[router] Route with name '${to.name}' not found`)
-        return { ...START_LOCATION_NORMALIZED, path: '/' }
+        throw new Error(`您正在尝试访问的路由 '${to.name}' 未在路由表中定义。请检查您的路由配置。`)
       }
       // 合并 params
       const path = fillParams(route.path, to.params)
+      const finalQuery = to.params || {}
       return {
         path,
         name: to.name,
         params: to.params || {},
-        query: to.query || {},
+        query: finalQuery,
         hash: to.hash || '',
-        fullPath: stringifyQuery(path, to.query || {}),
+        fullPath: stringifyQuery(path, finalQuery),
         meta: route.meta || {},
       }
     }
@@ -62,14 +63,18 @@ export function createRouter(options: RouterOptions): Router {
     return { ...START_LOCATION_NORMALIZED }
   }
 
-  function resolvePath(path: string, query?: any): RouteLocationNormalized {
+  function resolvePath(path: string, query?: LocationQuery): RouteLocationNormalized {
     // 简单查找
     // 注意：这里没有实现复杂的正则匹配，仅做简单全等或前缀匹配
-    // 实际项目中可能需要 path-to-regexp
+    // 暂不使用 path-to-regexp
     const normalizedPath = normalizeUrl(path.split('?')[0])
     const route = routes.find(
       r => r.path === normalizedPath || r.aliasPath === normalizedPath,
     )
+
+    if (!route) {
+      throw new Error(`您正在尝试访问的路由 '${normalizedPath}' 未在路由表中定义。请检查您的路由配置。`)
+    }
 
     const urlParams = getUrlParams(path)
     const finalQuery = { ...urlParams, ...(query || {}) }
@@ -121,22 +126,24 @@ export function createRouter(options: RouterOptions): Router {
     }
   }
 
-  async function navigate(to: RouteLocationRaw, type: NavType) {
+  async function navigate(to: RouteLocationRaw, type: NavType, skipGuards = false) {
     const targetLocation = resolve(to)
     const fromLocation = unref(currentRoute)
 
     // 1. 执行前置守卫
-    try {
-      await runGuardQueue(beforeGuards, targetLocation, fromLocation)
-    }
-    catch (error: any) {
-      if (error && (error.message === 'NavigationCancelled' || error.message === 'NavigationRedirect')) {
-        if (error.message === 'NavigationRedirect' && error.to) {
-          return navigate(error.to, type)
+    if (!skipGuards) {
+      try {
+        await runGuardQueue(beforeGuards, targetLocation, fromLocation)
+      }
+      catch (error: any) {
+        if (error && (error.message === 'NavigationCancelled' || error.message === 'NavigationRedirect')) {
+          if (error.message === 'NavigationRedirect' && error.to) {
+            return navigate(error.to, type, true)
+          }
+          return Promise.reject(error)
         }
         return Promise.reject(error)
       }
-      return Promise.reject(error)
     }
 
     // 2. 执行实际跳转
@@ -145,39 +152,51 @@ export function createRouter(options: RouterOptions): Router {
     const finalType
       = (typeof to === 'object' && to.navType) || type || 'push'
 
-    performUniNavigate(finalType, url)
+    try {
+      await performUniNavigate(finalType, url)
 
-    // 3. 更新当前路由 (注意：uni-app 页面栈变化后会自动触发 onLoad/onShow，这里主要是为了保持状态同步)
-    // 实际上 uni-app 的路由变化是异步的，这里更新可能早于页面加载
-    // 可以在 App.mixin 中再次校准
-    currentRoute.value = targetLocation
+      // 3. 更新当前路由 (注意：uni-app 页面栈变化后会自动触发 onLoad/onShow，这里主要是为了保持状态同步)
+      // 实际上 uni-app 的路由变化是异步的，这里更新可能早于页面加载
+      // 可以在 App.mixin 中再次校准
+      currentRoute.value = targetLocation
 
-    // 4. 执行后置守卫
-    afterGuards.forEach(guard => guard(targetLocation, fromLocation))
+      // 4. 执行后置守卫
+      afterGuards.forEach(guard => guard(targetLocation, fromLocation))
 
-    return Promise.resolve()
+      return Promise.resolve()
+    }
+    catch (error: any) {
+      return Promise.reject(error)
+    }
   }
 
-  function performUniNavigate(type: NavType, url: string) {
-    switch (type) {
-      case 'push':
-        uni.navigateTo({ url })
-        break
-      case 'replace':
-        uni.redirectTo({ url })
-        break
-      case 'pushTab':
-        uni.switchTab({ url })
-        break
-      case 'replaceAll':
-        uni.reLaunch({ url })
-        break
-      case 'back':
-        uni.navigateBack({})
-        break
-      default:
-        uni.navigateTo({ url })
-    }
+  function performUniNavigate(type: NavType, url: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const success = () => resolve()
+      const fail = (error: any) => {
+        reject(new Error(`Navigation failed: ${error.message || error.errMsg || 'Unknown error'}`))
+      }
+
+      switch (type) {
+        case 'push':
+          uni.navigateTo({ url, success, fail })
+          break
+        case 'replace':
+          uni.redirectTo({ url, success, fail })
+          break
+        case 'pushTab':
+          uni.switchTab({ url, success, fail })
+          break
+        case 'replaceAll':
+          uni.reLaunch({ url, success, fail })
+          break
+        case 'back':
+          uni.navigateBack({ success, fail })
+          break
+        default:
+          uni.navigateTo({ url, success, fail })
+      }
+    })
   }
 
   // -------------------------
@@ -191,53 +210,50 @@ export function createRouter(options: RouterOptions): Router {
     for (const guard of guards) {
       await new Promise<void>((resolve, reject) => {
         const next: NavigationGuardNext = (val) => {
+          ;(next as any)._called = true
           if (val === false) {
             reject(new Error('NavigationCancelled'))
           }
-          else if (val === undefined) {
+          else if (val === undefined || val === true) {
             resolve()
           }
           else {
-            // 重定向
             const error = new Error('NavigationRedirect')
             ;(error as any).to = val
             reject(error)
           }
         }
 
-        // 支持 Promise 返回和 next 回调两种模式
-        const res = guard(to, from, next)
-        if (res instanceof Promise) {
-          res.then((val) => {
-            // 如果 Promise 返回了 false 或 路径，也算作处理结果
-            if (val === false) {
-              reject(new Error('NavigationCancelled'))
-            }
-            else if (val === undefined || val === true) {
-              resolve()
-            }
-            else {
-              const error = new Error('NavigationRedirect')
-              ;(error as any).to = val
-              reject(error)
-            }
-          }).catch(reject)
+        const guardReturn = guard(to, from, next)
+        let guardCall = Promise.resolve(guardReturn)
+
+        if (guard.length < 3) {
+          guardCall = guardCall.then(next)
         }
-        else if (res !== undefined && typeof res !== 'function') {
-          // 同步返回值处理
-          if (res === false) {
-            reject(new Error('NavigationCancelled'))
-          }
-          else if (res === true) {
-            resolve()
+        else {
+          const message = `The "next" callback was never called inside of ${
+            guard.name ? `"${guard.name}"` : ''
+          }:\n${guard.toString()}\n. If you are returning a value instead of calling "next", make sure to remove the "next" parameter from your function.`
+
+          if (guardReturn !== null && typeof guardReturn === 'object' && 'then' in guardReturn) {
+            guardCall = guardCall.then((resolvedValue) => {
+              if (!(next as any)._called) {
+                console.warn(message)
+                return Promise.reject(new Error('Invalid navigation guard'))
+              }
+              return resolvedValue
+            })
           }
           else {
-            const error = new Error('NavigationRedirect')
-            ;(error as any).to = res
-            reject(error)
+            if (!(next as any)._called) {
+              console.warn(message)
+              reject(new Error('Invalid navigation guard'))
+              return
+            }
           }
         }
-        // 如果使用了 next，上面的逻辑会等待 next 调用
+
+        guardCall.catch((err) => reject(err))
       })
     }
   }
@@ -314,6 +330,10 @@ export function createRouter(options: RouterOptions): Router {
 
       // 查找 route 配置以获取 name/meta
       const matched = router.routes.find(r => r.path === newPath || r.aliasPath === newPath)
+
+      if (!matched) {
+        console.warn(`[router] 路由 '${newPath}' 未在路由表中定义，但页面已加载。请检查您的路由配置。`)
+      }
 
       const to: RouteLocationNormalized = {
         path: newPath,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePage({
-  name: 'demo-protected',
+  name: 'advanced-protected',
   style: {
     navigationBarTitleText: '受保护页面',
   },

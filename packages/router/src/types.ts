@@ -53,7 +53,7 @@ export interface RouterOptions {
 }
 
 export type NavigationGuardNext = (
-  to?: RouteLocationRaw | false | void,
+  to?: RouteLocationRaw | false | true | void,
 ) => void
 
 export type NavigationGuard = (
