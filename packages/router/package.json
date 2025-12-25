@@ -1,6 +1,6 @@
 {
   "name": "@wot-ui/router",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "轻量级 uni-app vue3 路由库",
   "repository": {
     "type": "git",
