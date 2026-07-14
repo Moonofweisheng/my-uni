@@ -7,11 +7,18 @@ export type LocationQuery = Record<string, LocationQueryValue | Exclude<Location
 export type RouteMeta = Record<string | number | symbol, unknown>
 
 /**
- * 窗口动画类型，参照 uni-app 官方定义（显示动画场景）
+ * 窗口显示动画类型，参照 uni-app 官方定义（显示动画场景，用于页面跳转打开）
  *
  * @see https://uniapp.dcloud.net.cn/api/router.html#animation
  */
 export type AnimationType = 'slide-in-right' | 'slide-in-left' | 'slide-in-top' | 'slide-in-bottom' | 'pop-in' | 'fade-in' | 'zoom-out' | 'zoom-fade-out' | 'none' | 'auto'
+
+/**
+ * 窗口关闭动画类型，参照 uni-app 官方定义（关闭动画场景，用于页面返回/关闭）
+ *
+ * @see https://uniapp.dcloud.net.cn/api/router.html#animation
+ */
+export type AnimationBackType = 'slide-out-right' | 'slide-out-left' | 'slide-out-top' | 'slide-out-bottom' | 'pop-out' | 'fade-out' | 'zoom-in' | 'zoom-fade-in' | 'none' | 'auto'
 
 export type RGBAColor = `rgba(${number}, ${number}, ${number}, ${number})`
 export type HEXColor = `#${string}`
@@ -24,7 +31,9 @@ export interface RouteLocationBase {
   animationDuration?: number
 }
 
-export interface RouteBackLocation extends RouteLocationBase {
+export interface RouteBackLocation {
+  animationType?: AnimationBackType
+  animationDuration?: number
   delta?: number
 }
 
