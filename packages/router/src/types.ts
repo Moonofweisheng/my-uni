@@ -6,7 +6,12 @@ export type LocationQueryValue = string | number | null | undefined
 export type LocationQuery = Record<string, LocationQueryValue | Exclude<LocationQueryValue, null | undefined>[]>
 export type RouteMeta = Record<string | number | symbol, unknown>
 
-export type AnimationType = 'auto' | 'none' | 'slide-out-right' | 'slide-out-left' | 'slide-out-top' | 'slide-out-bottom' | 'fade-out' | 'zoom-in' | 'zoom-fade-in' | 'pop-out'
+/**
+ * 窗口动画类型，参照 uni-app 官方定义（显示动画场景）
+ *
+ * @see https://uniapp.dcloud.net.cn/api/router.html#animation
+ */
+export type AnimationType = 'slide-in-right' | 'slide-in-left' | 'slide-in-top' | 'slide-in-bottom' | 'pop-in' | 'fade-in' | 'zoom-out' | 'zoom-fade-out' | 'none' | 'auto'
 
 export type RGBAColor = `rgba(${number}, ${number}, ${number}, ${number})`
 export type HEXColor = `#${string}`
@@ -1443,7 +1448,7 @@ export type RouteLocationRaw
       hash?: string
       replace?: boolean
       navType?: NavType // 扩展：支持指定跳转方式
-      animationType?: string
+      animationType?: AnimationType
       animationDuration?: number
     }
 
