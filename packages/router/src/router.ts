@@ -326,7 +326,7 @@ export function createRouter(options: RouterOptions): Router {
 
       // 避免重复更新
       const newPath = `/${page.route}`
-      const newFullPath = fullPath.startsWith('/') ? fullPath : `/${fullPath}`
+      const newFullPath = stringifyQuery(newPath, q)
 
       // 如果当前路由已经是最新，则跳过更新（避免重复触发）
       if (router.currentRoute.value.fullPath === newFullPath) {
@@ -349,7 +349,7 @@ export function createRouter(options: RouterOptions): Router {
         params: {},
         query: q,
         hash: '',
-        fullPath: fullPath.startsWith('/') ? fullPath : `/${fullPath}`,
+        fullPath: newFullPath,
         style: matched?.style || {},
         ...Object.fromEntries(
           Object.entries(matched || {}).filter(([key]) => !['path', 'name', 'meta', 'style', 'aliasPath'].includes(key))

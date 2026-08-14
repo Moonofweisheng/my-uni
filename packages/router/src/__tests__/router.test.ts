@@ -115,6 +115,28 @@ describe('createRouter - 路由器创建', () => {
 
       expect(router.currentRoute.value.path).toBe('/pages/index')
     })
+
+    it('页面缺少 fullPath 时应该同步同路径的新查询参数', () => {
+      const router = createRouter({ routes })
+      let capturedMixin: any = null
+      const app: any = {
+        provide: vi.fn(),
+        config: { globalProperties: {} },
+        mixin: (mixin: any) => {
+          capturedMixin = mixin
+        },
+      }
+      router.install(app)
+
+      const mockPage = { route: 'pages/detail' }
+      ;(globalThis as any).getCurrentPages = () => [mockPage]
+
+      capturedMixin.onLoad.call({ $mpType: 'page' }, { id: '1' })
+      capturedMixin.onLoad.call({ $mpType: 'page' }, { id: '2' })
+
+      expect(router.currentRoute.value.query).toEqual({ id: '2' })
+      expect(router.currentRoute.value.fullPath).toBe('/pages/detail?id=2')
+    })
   })
 
   describe('replace - 替换当前页面', () => {
