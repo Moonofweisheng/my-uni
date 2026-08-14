@@ -28,7 +28,8 @@
     "clean": "rimraf dist",
     "build": "tsdown",
     "dev": "tsdown --watch",
-    "lint": "eslint --fix --ext .json,.js,.ts src",
+    "lint": "pnpm --workspace-root exec eslint packages/router/src",
+    "lint:fix": "pnpm --workspace-root exec eslint packages/router/src --fix",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage"
