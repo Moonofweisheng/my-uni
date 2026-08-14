@@ -1,22 +1,15 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
     "lib": [
       "esnext",
       "dom",
       "dom.iterable",
       "esnext.String"
     ],
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "removeComments": true,
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": false,
-    "noUnusedLocals": true,
-    "moduleResolution": "node",
     "baseUrl": "./",
+    "module": "esnext",
+    "moduleResolution": "node",
     "paths": {
       "@/*": [
         "src/*"
@@ -25,7 +18,14 @@
     "types": [
       "@types/node",
       "@dcloudio/types"
-    ]
+    ],
+    "allowJs": true,
+    "strict": true,
+    "strictNullChecks": false,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "removeComments": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "src/*.ts"
