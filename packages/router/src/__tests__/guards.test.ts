@@ -254,9 +254,10 @@ describe('router guards - 路由守卫', () => {
       router.install(app)
 
       const mockNavigate = ({ url, success }: any) => {
-        const routePath = url.startsWith('/') ? url.slice(1) : url
-        const mockPage = { route: routePath, $page: { fullPath: url } };
-        (globalThis as any).getCurrentPages = () => [mockPage]
+        const path = url.split('?')[0]
+        const routePath = path.startsWith('/') ? path.slice(1) : path
+        const mockPage = { route: routePath, $page: { fullPath: url } }
+        ;(globalThis as any).getCurrentPages = () => [mockPage]
         if (capturedMixin?.onLoad)
           capturedMixin.onLoad.call({ $mpType: 'page' })
         success?.()
