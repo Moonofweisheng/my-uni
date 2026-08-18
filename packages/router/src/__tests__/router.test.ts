@@ -187,7 +187,7 @@ describe('createRouter - 路由器创建', () => {
       })
 
       expect(uni.navigateTo).toHaveBeenCalledWith(
-        expect.objectContaining({ url: '/pages/index', animationType: 'slide-in-bottom', animationDuration: 300 })
+        expect.objectContaining({ url: '/pages/index', animationType: 'slide-in-bottom', animationDuration: 300 }),
       )
     })
   })
@@ -212,6 +212,21 @@ describe('createRouter - 路由器创建', () => {
       router.back({ delta: 1, animationType: 'none' })
 
       expect(uni.navigateBack).toHaveBeenCalledWith({ delta: 1, animationType: 'none' })
+    })
+
+    it('应该通过 navType 透传返回参数', async () => {
+      const router = createRouter({ routes })
+      await router.push({
+        path: '/pages/index',
+        navType: 'back',
+        delta: 2,
+        animationType: 'slide-out-bottom',
+        animationDuration: 300,
+      })
+
+      expect(uni.navigateBack).toHaveBeenCalledWith(
+        expect.objectContaining({ delta: 2, animationType: 'slide-out-bottom', animationDuration: 300 }),
+      )
     })
   })
 
