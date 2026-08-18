@@ -254,8 +254,7 @@ function copyCode(code: string) {
 
               interface RouteBackLocation {
               delta?: number
-              url?: string
-              animationType?: AnimationType
+              animationType?: AnimationBackType
               animationDuration?: number
               }
             </text>

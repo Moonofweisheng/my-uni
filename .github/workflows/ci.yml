@@ -48,6 +48,9 @@ jobs:
       - name: Run unit tests for router package
         run: pnpm -F @wot-ui/router test -- --run
 
+      - name: Run type tests for router package
+        run: pnpm -F @wot-ui/router test:types
+
       - name: Upload test coverage
         uses: actions/upload-artifact@v4
         with:

@@ -6,7 +6,19 @@ export type LocationQueryValue = string | number | null | undefined
 export type LocationQuery = Record<string, LocationQueryValue | Exclude<LocationQueryValue, null | undefined>[]>
 export type RouteMeta = Record<string | number | symbol, unknown>
 
-export type AnimationType = 'auto' | 'none' | 'slide-out-right' | 'slide-out-left' | 'slide-out-top' | 'slide-out-bottom' | 'fade-out' | 'zoom-in' | 'zoom-fade-in' | 'pop-out'
+/**
+ * 窗口显示动画类型，用于页面打开场景
+ *
+ * @see https://uniapp.dcloud.net.cn/api/router.html#animation
+ */
+export type AnimationType = 'auto' | 'none' | 'slide-in-right' | 'slide-in-left' | 'slide-in-top' | 'slide-in-bottom' | 'fade-in' | 'zoom-out' | 'zoom-fade-out' | 'pop-in'
+
+/**
+ * 窗口关闭动画类型，用于页面返回场景
+ *
+ * @see https://uniapp.dcloud.net.cn/api/router.html#animation
+ */
+export type AnimationBackType = 'auto' | 'none' | 'slide-out-right' | 'slide-out-left' | 'slide-out-top' | 'slide-out-bottom' | 'fade-out' | 'zoom-in' | 'zoom-fade-in' | 'pop-out'
 
 export type RGBAColor = `rgba(${number}, ${number}, ${number}, ${number})`
 export type HEXColor = `#${string}`
@@ -19,12 +31,15 @@ export interface RouteLocationBase {
   animationDuration?: number
 }
 
-export interface RouteBackLocation extends RouteLocationBase {
+export interface RouteBackLocation {
+  animationType?: AnimationBackType
+  animationDuration?: number
   delta?: number
 }
 
 export interface RouteNavigationOptions {
-  animationType?: string
+  navType?: NavType
+  animationType?: AnimationType | AnimationBackType
   animationDuration?: number
   delta?: number
 }
@@ -1439,31 +1454,71 @@ export interface RouteLocationNormalized {
   [x: string]: any
 }
 
-export interface RouteLocationObject extends RouteNavigationOptions {
+export interface RouteLocationObjectBase {
   path?: string
   name?: string
   params?: RouteParams
   query?: LocationQuery
   hash?: string
   replace?: boolean
-  navType?: NavType // 扩展：支持指定跳转方式
 }
 
-export type RouteLocationRaw = string | RouteLocationObject
+export interface RouteLocationObject extends RouteLocationObjectBase, RouteNavigationOptions {}
+
+export interface RouteForwardLocationObject extends RouteLocationObjectBase {
+  navType?: Exclude<NavType, 'back'>
+  animationType?: AnimationType
+  animationDuration?: number
+  delta?: never
+}
+
+export interface RouteBackLocationObject extends RouteLocationObjectBase {
+  navType: 'back'
+  animationType?: AnimationBackType
+  animationDuration?: number
+  delta?: number
+}
+
+export type RouteLocationRaw = string | RouteForwardLocationObject | RouteBackLocationObject
+
+type CompatibleRouteLocationObject<T extends RouteLocationObject>
+  = [keyof RouteNavigationOptions] extends [keyof T]
+    ? [RouteNavigationOptions['navType']] extends [T['navType']]
+        ? [RouteNavigationOptions['animationType']] extends [T['animationType']]
+            ? [RouteNavigationOptions['delta']] extends [T['delta']]
+                ? unknown
+                : never
+            : never
+        : never
+    : never
+
+export interface RouteNavigationMethod {
+  (to: RouteLocationRaw): Promise<any>
+  <T extends RouteLocationObject>(
+    to: T,
+    ...compatible: CompatibleRouteLocationObject<T> extends never ? [never] : []
+  ): Promise<any>
+}
 
 export interface RouterOptions {
   routes: RouteRecordRaw[]
 }
 
-export type NavigationGuardNext = (
-  to?: RouteLocationRaw | false | true | void,
-) => void
+export interface NavigationGuardNext {
+  (to?: RouteLocationRaw | false | true | void): void
+  <T extends RouteLocationObject>(
+    to: T,
+    ...compatible: CompatibleRouteLocationObject<T> extends never ? [never] : []
+  ): void
+}
+
+export type NavigationGuardReturn = RouteLocationRaw | RouteLocationObject | false | boolean | void
 
 export type NavigationGuard = (
   to: RouteLocationNormalized,
   from: RouteLocationNormalized,
   next: NavigationGuardNext,
-) => Promise<void | RouteLocationRaw | false | boolean> | void | RouteLocationRaw | false | boolean
+) => Promise<NavigationGuardReturn> | NavigationGuardReturn
 
 export type NavigationHookAfter = (
   to: RouteLocationNormalized,
@@ -1477,10 +1532,10 @@ export type RouteBackRaw = number | RouteBackLocation
 export interface Router {
   readonly currentRoute: Ref<RouteLocationNormalized>
   readonly routes: RouteRecordRaw[]
-  push: (to: RouteLocationRaw) => Promise<any>
-  replace: (to: RouteLocationRaw) => Promise<any>
-  replaceAll: (to: RouteLocationRaw) => Promise<any>
-  pushTab: (to: RouteLocationRaw) => Promise<any>
+  push: RouteNavigationMethod
+  replace: RouteNavigationMethod
+  replaceAll: RouteNavigationMethod
+  pushTab: RouteNavigationMethod
   back: (back?: RouteBackRaw) => void
   beforeEach: (guard: NavigationGuard) => () => void
   afterEach: (guard: NavigationHookAfter) => () => void

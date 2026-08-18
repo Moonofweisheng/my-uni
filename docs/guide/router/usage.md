@@ -55,7 +55,7 @@ router.push({ path: '/user', hash: '#section' })
 | hash | `string` | URL hash 值 |
 | replace | `boolean` | 是否使用 replace 方式跳转 |
 | navType | `NavType` | 跳转类型：`'push'` \| `'replace'` \| `'replaceAll'` \| `'pushTab'` \| `'back'` |
-| animationType | `string` | 窗口动画类型；普通跳转使用入场动画，`navType: 'back'` 时使用退场动画 |
+| animationType | `AnimationType` / `AnimationBackType` | 窗口动画类型；普通跳转使用入场动画，`navType: 'back'` 时使用退场动画 |
 | animationDuration | `number` | 窗口动画持续时间，单位为 ms |
 | delta | `number` | `navType: 'back'` 时返回的页面数 |
 

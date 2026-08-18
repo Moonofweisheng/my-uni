@@ -9,6 +9,7 @@ import type {
   RouteLocationNormalized,
   RouteLocationObject,
   RouteLocationRaw,
+  RouteNavigationMethod,
   Router,
   RouterOptions,
 } from './types'
@@ -31,7 +32,7 @@ export function createRouter(options: RouterOptions): Router {
   // -------------------------
   // 核心跳转逻辑
   // -------------------------
-  function resolve(to: RouteLocationRaw): RouteLocationNormalized {
+  function resolve(to: RouteLocationObject | RouteLocationRaw): RouteLocationNormalized {
     if (typeof to === 'string') {
       return resolvePath(to)
     }
@@ -111,16 +112,16 @@ export function createRouter(options: RouterOptions): Router {
   // -------------------------
   // 导航方法
   // -------------------------
-  function push(to: RouteLocationRaw) {
+  const push: RouteNavigationMethod = (to: RouteLocationObject | RouteLocationRaw) => {
     return navigate(to, 'push')
   }
-  function replace(to: RouteLocationRaw) {
+  const replace: RouteNavigationMethod = (to: RouteLocationObject | RouteLocationRaw) => {
     return navigate(to, 'replace')
   }
-  function replaceAll(to: RouteLocationRaw) {
+  const replaceAll: RouteNavigationMethod = (to: RouteLocationObject | RouteLocationRaw) => {
     return navigate(to, 'replaceAll')
   }
-  function pushTab(to: RouteLocationRaw) {
+  const pushTab: RouteNavigationMethod = (to: RouteLocationObject | RouteLocationRaw) => {
     return navigate(to, 'pushTab')
   }
   function back(back?: RouteBackRaw) {
@@ -134,7 +135,7 @@ export function createRouter(options: RouterOptions): Router {
     }
   }
 
-  async function navigate(to: RouteLocationRaw, type: NavType, skipGuards = false) {
+  async function navigate(to: RouteLocationObject | RouteLocationRaw, type: NavType, skipGuards = false) {
     const targetLocation = resolve(to)
     const fromLocation = unref(currentRoute)
 
@@ -244,7 +245,7 @@ export function createRouter(options: RouterOptions): Router {
   ) {
     for (const guard of guards) {
       await new Promise<void>((resolve, reject) => {
-        const next: NavigationGuardNext = (val) => {
+        const next: NavigationGuardNext = (val: RouteLocationObject | RouteLocationRaw | false | true | void) => {
           ;(next as any)._called = true
           if (val === false) {
             reject(new Error('NavigationCancelled'))
