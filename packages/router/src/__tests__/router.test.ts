@@ -177,6 +177,21 @@ describe('createRouter - 路由器创建', () => {
     })
   })
 
+  describe('push - 带有动画配置', () => {
+    it('应该在使用 push 时将 animationType 和 animationDuration 传给 uni.navigateTo', async () => {
+      const router = createRouter({ routes })
+      await router.push({
+        path: '/pages/index',
+        animationType: 'slide-in-bottom',
+        animationDuration: 300,
+      })
+
+      expect(uni.navigateTo).toHaveBeenCalledWith(
+        expect.objectContaining({ url: '/pages/index', animationType: 'slide-in-bottom', animationDuration: 300 })
+      )
+    })
+  })
+
   describe('back - 返回上一页', () => {
     it('应该调用 uni.navigateBack 并使用默认 delta', () => {
       const router = createRouter({ routes })
