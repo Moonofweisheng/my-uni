@@ -7,6 +7,7 @@ import type {
   NavType,
   RouteBackRaw,
   RouteLocationNormalized,
+  RouteLocationObject,
   RouteLocationRaw,
   Router,
   RouterOptions,
@@ -159,18 +160,8 @@ export function createRouter(options: RouterOptions): Router {
     const finalType
       = (typeof to === 'object' && to.navType) || type || 'push'
 
-    const options: { animationType?: any; animationDuration?: number; delta?: number } = {}
-    if (typeof to === 'object') {
-      if (to.animationType !== undefined)
-        options.animationType = to.animationType
-      if (to.animationDuration !== undefined)
-        options.animationDuration = to.animationDuration
-      if ((to as any).delta !== undefined)
-        options.delta = (to as any).delta
-    }
-
     try {
-      await performUniNavigate(finalType, url, options)
+      await performUniNavigate(finalType, url, typeof to === 'object' ? to : undefined)
 
       // 3. 更新当前路由
       // 这里移除主动更新，完全依赖 syncRouteFromPage (页面 onLoad/onShow) 来更新状态
@@ -189,7 +180,7 @@ export function createRouter(options: RouterOptions): Router {
   function performUniNavigate(
     type: NavType,
     url: string,
-    options?: { animationType?: any; animationDuration?: number; delta?: number }
+    location?: RouteLocationObject,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       const success = () => resolve()
@@ -198,15 +189,17 @@ export function createRouter(options: RouterOptions): Router {
       }
 
       switch (type) {
-        case 'push':
+        case 'push': {
+          const navOptions = location?.navType !== 'back' ? location : undefined
           uni.navigateTo({
             url,
             success,
             fail,
-            animationType: options?.animationType,
-            animationDuration: options?.animationDuration,
+            animationType: navOptions?.animationType as UniNamespace.NavigateToOptions['animationType'],
+            animationDuration: navOptions?.animationDuration,
           })
           break
+        }
         case 'replace':
           uni.redirectTo({ url, success, fail })
           break
@@ -216,23 +209,27 @@ export function createRouter(options: RouterOptions): Router {
         case 'replaceAll':
           uni.reLaunch({ url, success, fail })
           break
-        case 'back':
+        case 'back': {
+          const navOptions = location?.navType === 'back' ? location : undefined
           uni.navigateBack({
             success,
             fail,
-            delta: options?.delta,
-            animationType: options?.animationType,
-            animationDuration: options?.animationDuration,
+            delta: navOptions?.delta,
+            animationType: navOptions?.animationType as UniNamespace.NavigateBackOptions['animationType'],
+            animationDuration: navOptions?.animationDuration,
           })
           break
-        default:
+        }
+        default: {
+          const navOptions = location?.navType !== 'back' ? location : undefined
           uni.navigateTo({
             url,
             success,
             fail,
-            animationType: options?.animationType,
-            animationDuration: options?.animationDuration,
+            animationType: navOptions?.animationType as UniNamespace.NavigateToOptions['animationType'],
+            animationDuration: navOptions?.animationDuration,
           })
+        }
       }
     })
   }

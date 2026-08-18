@@ -23,6 +23,12 @@ export interface RouteBackLocation extends RouteLocationBase {
   delta?: number
 }
 
+export interface RouteNavigationOptions {
+  animationType?: string
+  animationDuration?: number
+  delta?: number
+}
+
 export interface RouteRecordRaw {
   /**
    * 路由路径
@@ -1433,19 +1439,17 @@ export interface RouteLocationNormalized {
   [x: string]: any
 }
 
-export type RouteLocationRaw
-  = | string
-    | {
-      path?: string
-      name?: string
-      params?: RouteParams
-      query?: LocationQuery
-      hash?: string
-      replace?: boolean
-      navType?: NavType // 扩展：支持指定跳转方式
-      animationType?: string
-      animationDuration?: number
-    }
+export interface RouteLocationObject extends RouteNavigationOptions {
+  path?: string
+  name?: string
+  params?: RouteParams
+  query?: LocationQuery
+  hash?: string
+  replace?: boolean
+  navType?: NavType // 扩展：支持指定跳转方式
+}
+
+export type RouteLocationRaw = string | RouteLocationObject
 
 export interface RouterOptions {
   routes: RouteRecordRaw[]
