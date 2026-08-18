@@ -7,9 +7,9 @@
  * @FilePath: /my-uni/packages/router/src/index.ts
  * 记得注释
  */
+import type { Ref } from 'vue'
 import type { RouteLocationNormalized, Router } from './types'
 import { inject, reactive, watch } from 'vue'
-import type { Ref } from 'vue'
 import { routeKey, routerKey } from './router'
 
 export { createRouter } from './router'
@@ -19,7 +19,8 @@ export function useRouter(): Router {
   const router = inject<Router>(routerKey)
   if (router) {
     return router
-  } else {
+  }
+  else {
     throw new Error('useRouter 只可以在 Vue 上下文中使用，请确保你已经正确地注册了 "uni-mini-router" 并且当前正处于 Vue 上下文中')
   }
 }
@@ -32,7 +33,8 @@ export function useRoute(): RouteLocationNormalized {
       Object.assign(route, to)
     })
     return route as RouteLocationNormalized
-  } else {
+  }
+  else {
     throw new Error('useRoute 只可以在 Vue 上下文中使用，请确保你已经正确地注册了 "uni-mini-router" 并且当前正处于 Vue 上下文中')
   }
 }

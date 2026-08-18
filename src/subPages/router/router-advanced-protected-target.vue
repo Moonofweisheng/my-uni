@@ -54,28 +54,52 @@ function goBack() {
           </view>
           <view class="space-y-2">
             <view class="flex items-start gap-2">
-              <text class="text-3 text-blue-600">1.</text>
-              <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">用户尝试访问此页面</text>
+              <text class="text-3 text-blue-600">
+                1.
+              </text>
+              <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">
+                用户尝试访问此页面
+              </text>
             </view>
             <view class="flex items-start gap-2">
-              <text class="text-3 text-blue-600">2.</text>
-              <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">beforeEach 守卫被触发</text>
+              <text class="text-3 text-blue-600">
+                2.
+              </text>
+              <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">
+                beforeEach 守卫被触发
+              </text>
             </view>
             <view class="flex items-start gap-2">
-              <text class="text-3 text-blue-600">3.</text>
-              <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">守卫显示确认对话框</text>
+              <text class="text-3 text-blue-600">
+                3.
+              </text>
+              <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">
+                守卫显示确认对话框
+              </text>
             </view>
             <view class="flex items-start gap-2">
-              <text class="text-3 text-blue-600">4.</text>
-              <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">用户点击"继续访问"</text>
+              <text class="text-3 text-blue-600">
+                4.
+              </text>
+              <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">
+                用户点击"继续访问"
+              </text>
             </view>
             <view class="flex items-start gap-2">
-              <text class="text-3 text-blue-600">5.</text>
-              <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">守卫调用 next() 允许导航</text>
+              <text class="text-3 text-blue-600">
+                5.
+              </text>
+              <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">
+                守卫调用 next() 允许导航
+              </text>
             </view>
             <view class="flex items-start gap-2">
-              <text class="text-3 text-blue-600">6.</text>
-              <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">页面成功加载</text>
+              <text class="text-3 text-blue-600">
+                6.
+              </text>
+              <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">
+                页面成功加载
+              </text>
             </view>
           </view>
         </view>

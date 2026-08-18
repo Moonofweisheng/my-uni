@@ -39,16 +39,28 @@ function goBack() {
         </view>
         <view class="space-y-2">
           <view class="flex items-start gap-2">
-            <text class="text-3 text-green-600">✓</text>
-            <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">您已经登录</text>
+            <text class="text-3 text-green-600">
+              ✓
+            </text>
+            <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">
+              您已经登录
+            </text>
           </view>
           <view class="flex items-start gap-2">
-            <text class="text-3 text-green-600">✓</text>
-            <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">权限守卫验证通过</text>
+            <text class="text-3 text-green-600">
+              ✓
+            </text>
+            <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">
+              权限守卫验证通过
+            </text>
           </view>
           <view class="flex items-start gap-2">
-            <text class="text-3 text-green-600">✓</text>
-            <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">导航未被拦截</text>
+            <text class="text-3 text-green-600">
+              ✓
+            </text>
+            <text class="text-3.5 text-gray-700 dark:text-[var(--wot-dark-color)]">
+              导航未被拦截
+            </text>
           </view>
         </view>
       </view>

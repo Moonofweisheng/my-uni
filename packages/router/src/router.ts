@@ -1,4 +1,3 @@
-import { shallowRef, unref } from 'vue'
 import type { App, InjectionKey, Ref } from 'vue'
 import type {
   LocationQuery,
@@ -12,12 +11,13 @@ import type {
   Router,
   RouterOptions,
 } from './types'
+import { shallowRef, unref } from 'vue'
 import { START_LOCATION_NORMALIZED } from './types'
 import { getUrlParams, normalizeUrl, stringifyQuery } from './utils'
 
 // 注入 Key
 export const routerKey: InjectionKey<Router> = Symbol('__ROUTER__')
-export const routeKey: InjectionKey<Ref<RouteLocationNormalized>  > = Symbol('__ROUTE__')
+export const routeKey: InjectionKey<Ref<RouteLocationNormalized>> = Symbol('__ROUTE__')
 
 export function createRouter(options: RouterOptions): Router {
   const currentRoute = shallowRef<RouteLocationNormalized>(
@@ -53,8 +53,8 @@ export function createRouter(options: RouterOptions): Router {
         meta: route.meta || {},
         style: route.style || {},
         ...Object.fromEntries(
-          Object.entries(route).filter(([key]) => !['path', 'name', 'meta', 'style', 'aliasPath'].includes(key))
-        )
+          Object.entries(route).filter(([key]) => !['path', 'name', 'meta', 'style', 'aliasPath'].includes(key)),
+        ),
       }
     }
 
@@ -92,8 +92,8 @@ export function createRouter(options: RouterOptions): Router {
       meta: route?.meta || {},
       style: route?.style || {},
       ...Object.fromEntries(
-        Object.entries(route || {}).filter(([key]) => !['path', 'name', 'meta', 'style', 'aliasPath'].includes(key))
-      )
+        Object.entries(route || {}).filter(([key]) => !['path', 'name', 'meta', 'style', 'aliasPath'].includes(key)),
+      ),
     }
   }
 
@@ -259,7 +259,7 @@ export function createRouter(options: RouterOptions): Router {
           }
         }
 
-        guardCall.catch((err) => reject(err))
+        guardCall.catch(err => reject(err))
       })
     }
   }
@@ -283,6 +283,19 @@ export function createRouter(options: RouterOptions): Router {
       if (i > -1)
         afterGuards.splice(i, 1)
     }
+  }
+
+  const router: Router = {
+    currentRoute,
+    routes,
+    push,
+    replace,
+    replaceAll,
+    pushTab,
+    back,
+    beforeEach,
+    afterEach,
+    install,
   }
 
   // -------------------------
@@ -326,9 +339,10 @@ export function createRouter(options: RouterOptions): Router {
 
       // 避免重复更新
       const newPath = `/${page.route}`
+      const newFullPath = stringifyQuery(newPath, q)
 
-      // 如果当前路由已经是最新路径，则跳过更新（避免重复触发）
-      if (router.currentRoute.value.path === newPath) {
+      // 如果当前路由已经是最新，则跳过更新（避免重复触发）
+      if (router.currentRoute.value.fullPath === newFullPath) {
         return
       }
 
@@ -348,11 +362,11 @@ export function createRouter(options: RouterOptions): Router {
         params: {},
         query: q,
         hash: '',
-        fullPath: fullPath.startsWith('/') ? fullPath : `/${fullPath}`,
+        fullPath: newFullPath,
         style: matched?.style || {},
         ...Object.fromEntries(
-          Object.entries(matched || {}).filter(([key]) => !['path', 'name', 'meta', 'style', 'aliasPath'].includes(key))
-        )
+          Object.entries(matched || {}).filter(([key]) => !['path', 'name', 'meta', 'style', 'aliasPath'].includes(key)),
+        ),
       }
 
       router.currentRoute.value = to
@@ -360,19 +374,6 @@ export function createRouter(options: RouterOptions): Router {
       // 触发后置守卫（针对原生跳转/返回）
       afterGuards?.forEach(guard => guard(to, from))
     }
-  }
-
-  const router: Router = {
-    currentRoute,
-    routes,
-    push,
-    replace,
-    replaceAll,
-    pushTab,
-    back,
-    beforeEach,
-    afterEach,
-    install,
   }
 
   return router

@@ -31,9 +31,10 @@ describe('createRouter - 路由器创建', () => {
     router.install(app)
 
     const mockNavigate = ({ url, success }: any) => {
-      const routePath = url.startsWith('/') ? url.slice(1) : url
-      const mockPage = { route: routePath, $page: { fullPath: url } };
-      (globalThis as any).getCurrentPages = () => [mockPage]
+      const path = url.split('?')[0]
+      const routePath = path.startsWith('/') ? path.slice(1) : path
+      const mockPage = { route: routePath, $page: { fullPath: url } }
+      ;(globalThis as any).getCurrentPages = () => [mockPage]
       if (capturedMixin?.onLoad) {
         capturedMixin.onLoad.call({ $mpType: 'page' })
       }
@@ -114,6 +115,38 @@ describe('createRouter - 路由器创建', () => {
       await router.push('/pages/index')
 
       expect(router.currentRoute.value.path).toBe('/pages/index')
+    })
+
+    it('页面缺少 fullPath 时应该同步同路径的新查询参数', () => {
+      const router = createRouter({ routes })
+      let capturedMixin: any = null
+      const app: any = {
+        provide: vi.fn(),
+        config: { globalProperties: {} },
+        mixin: (mixin: any) => {
+          capturedMixin = mixin
+        },
+      }
+      router.install(app)
+
+      const mockPage = { route: 'pages/detail' }
+      ;(globalThis as any).getCurrentPages = () => [mockPage]
+
+      capturedMixin.onLoad.call({ $mpType: 'page' }, { id: '1' })
+      capturedMixin.onLoad.call({ $mpType: 'page' }, { id: '2' })
+
+      expect(router.currentRoute.value.query).toEqual({ id: '2' })
+      expect(router.currentRoute.value.fullPath).toBe('/pages/detail?id=2')
+    })
+
+    it('连续 push 同一路径时应该同步新的查询参数', async () => {
+      const router = createRouterWithLifecycle(routes)
+
+      await router.push({ path: '/pages/detail', query: { id: '1' } })
+      await router.push({ path: '/pages/detail', query: { id: '2' } })
+
+      expect(router.currentRoute.value.query).toEqual({ id: '2' })
+      expect(router.currentRoute.value.fullPath).toBe('/pages/detail?id=2')
     })
   })
 

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { RouteRecordRaw } from '../types'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createRouter } from '../router'
 
 describe('router guards - 路由守卫', () => {
@@ -244,26 +244,28 @@ describe('router guards - 路由守卫', () => {
   describe('combined guards - 组合守卫', () => {
     // Helper to setup router with lifecycle mocking (same as above)
     function createRouterWithLifecycle(routes: RouteRecordRaw[]) {
-        const router = createRouter({ routes })
-        let capturedMixin: any = null
-        const app: any = {
-          provide: vi.fn(),
-          config: { globalProperties: {} },
-          mixin: (mixin: any) => { capturedMixin = mixin },
-        }
-        router.install(app)
-
-        const mockNavigate = ({ url, success }: any) => {
-          const routePath = url.startsWith('/') ? url.slice(1) : url
-          const mockPage = { route: routePath, $page: { fullPath: url } };
-          (globalThis as any).getCurrentPages = () => [mockPage]
-          if (capturedMixin?.onLoad) capturedMixin.onLoad.call({ $mpType: 'page' })
-          success?.()
-        }
-        uni.navigateTo = vi.fn(mockNavigate) as any
-        uni.redirectTo = vi.fn(mockNavigate) as any
-        return router
+      const router = createRouter({ routes })
+      let capturedMixin: any = null
+      const app: any = {
+        provide: vi.fn(),
+        config: { globalProperties: {} },
+        mixin: (mixin: any) => { capturedMixin = mixin },
       }
+      router.install(app)
+
+      const mockNavigate = ({ url, success }: any) => {
+        const path = url.split('?')[0]
+        const routePath = path.startsWith('/') ? path.slice(1) : path
+        const mockPage = { route: routePath, $page: { fullPath: url } }
+        ;(globalThis as any).getCurrentPages = () => [mockPage]
+        if (capturedMixin?.onLoad)
+          capturedMixin.onLoad.call({ $mpType: 'page' })
+        success?.()
+      }
+      uni.navigateTo = vi.fn(mockNavigate) as any
+      uni.redirectTo = vi.fn(mockNavigate) as any
+      return router
+    }
 
     it('应该按正确顺序执行 beforeEach 和 afterEach', async () => {
       const router = createRouterWithLifecycle(routes)
@@ -284,7 +286,7 @@ describe('router guards - 路由守卫', () => {
 
     it('应该处理认证守卫模式', async () => {
       const router = createRouterWithLifecycle(routes)
-      let isLoggedIn = false
+      const isLoggedIn = false
 
       router.beforeEach((to) => {
         if (to.meta?.auth && !isLoggedIn) {
