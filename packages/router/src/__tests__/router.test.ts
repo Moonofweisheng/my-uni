@@ -194,9 +194,9 @@ describe('createRouter - 路由器创建', () => {
 
     it('应该调用 uni.navigateBack 并传入选项对象', () => {
       const router = createRouter({ routes })
-      router.back({ delta: 1, animationType: 'none' })
+      router.back({ delta: 1, animationType: 'slide-out-right' })
 
-      expect(uni.navigateBack).toHaveBeenCalledWith({ delta: 1, animationType: 'none' })
+      expect(uni.navigateBack).toHaveBeenCalledWith({ delta: 1, animationType: 'slide-out-right' })
     })
   })
 
